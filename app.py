@@ -49,7 +49,7 @@ def purchasePlaces():
     flash('Great-booking complete!')
     return render_template('welcome.html', club=club, competitions=competitions)
 
-
+# Points_update
 # TODO: Add route for points display
 
 
