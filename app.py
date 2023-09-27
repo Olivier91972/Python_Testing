@@ -26,9 +26,21 @@ def index():
 
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
+    """
+    Displays the summary of all competitions
+    and points available by the connected club
+    """
+
+    try:
         club = [club for club in clubs if club['email'] == request.form['email']][0]
-        return render_template('welcome.html',club=club,competitions=competitions)
-        #test Login_email
+        return render_template('welcome.html', club=club, competitions=competitions)
+    except IndexError:
+        flash("Sorry, this email wasn't found. Please try again with a correct email !!")
+        return redirect(url_for('index'))
+        # club = [club for club in clubs if club['email'] == request.form['email']][0]
+        # return render_template('welcome.html',club=club,competitions=competitions)
+        # test Login_email
+
 
 @app.route('/book/<competition>/<club>')
 def book(competition,club):
