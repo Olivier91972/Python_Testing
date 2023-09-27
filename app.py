@@ -24,6 +24,10 @@ clubs = loadClubs()
 def index():
     return render_template('index.html')
 
+# Feature_Point_display
+def tableau_points():
+    return render_template('tableau.html', clubs=clubs)
+
 @app.route('/showSummary',methods=['POST'])
 def showSummary():
         club = [club for club in clubs if club['email'] == request.form['email']][0]
