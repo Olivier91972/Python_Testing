@@ -57,7 +57,7 @@ def book(competition, club):
     else:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
-# Book_past_competition
+#  Book_past_competition
 
 
 @app.route('/purchasePlaces',methods=['POST'])
