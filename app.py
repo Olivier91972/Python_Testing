@@ -65,7 +65,9 @@ def purchasePlaces():
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     placesRequired = int(request.form['places'])
-    if placesRequired > 12:
+    if date_is_passed(competition['date']):
+        flash('You cannot buy a place for a competition that has already passed.')
+    elif placesRequired > 12:
         flash('You cannot take more than 12 places')
         return render_template('booking.html', club=club, competition=competition)
     elif placesRequired > int(club["points"]):
