@@ -1,5 +1,8 @@
+import datetime
 import json
 from flask import Flask, render_template, request, redirect, flash, url_for
+
+from functions import date_is_passed
 
 
 def loadClubs():
@@ -21,6 +24,10 @@ competitions = loadCompetitions()
 clubs = loadClubs()
 
 
+now = datetime.datetime.now()
+current_date = now.strftime("%Y-%m-%d, %H:%M:%S")
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -28,8 +35,17 @@ def index():
 
 @app.route('/showSummary', methods=['POST'])
 def showSummary():
+    """
+    Displays the summary of all competitions
+    and points available by the connected club
+    """
+
+    try:
         club = [club for club in clubs if club['email'] == request.form['email']][0]
-        return render_template('welcome.html',club=club,competitions=competitions)
+        return render_template('welcome.html', club=club, competitions=competitions, current_date=current_date)
+    except IndexError:
+        flash("Sorry, this email wasn't found. Please try again with a correct email !!")
+        return redirect(url_for('index'))
 
 
 @app.route('/book/<competition>/<club>')
@@ -37,10 +53,11 @@ def book(competition, club):
     foundClub = [c for c in clubs if c['name'] == club][0]
     foundCompetition = [c for c in competitions if c['name'] == competition][0]
     if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        return render_template('booking.html', club=foundClub, competition=foundCompetition)
     else:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
+# Book_past_competition
 
 
 @app.route('/purchasePlaces',methods=['POST'])
