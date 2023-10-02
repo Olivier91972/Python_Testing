@@ -24,8 +24,6 @@ clubs = loadClubs()
 @app.route('/')
 def index():
     return render_template('index.html')
-# Feature_Point_display
-
 
 
 @app.route('/showSummary',methods=['POST'])
