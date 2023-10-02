@@ -67,6 +67,7 @@ def purchasePlaces():
     placesRequired = int(request.form['places'])
     if date_is_passed(competition['date']):
         flash('You cannot buy a place for a competition that has already passed.')
+        return render_template('welcome.html', club=club, competitions=competitions)
     elif placesRequired > 12:
         flash('You cannot take more than 12 places')
         return render_template('booking.html', club=club, competition=competition)
