@@ -70,6 +70,8 @@ def purchasePlaces():
     competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
     if date_is_passed(competition['date']):
         flash('You cannot buy a place for a competition that has already passed.')
+        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) + placesRequired
+        return render_template('welcome.html', club=club, competitions=competitions)
 
     else:
         flash('Great-booking complete!')
