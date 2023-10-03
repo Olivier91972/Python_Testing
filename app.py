@@ -33,7 +33,7 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/showSummary', methods=['POST'])
+@app.route('/showSummary',methods=['POST'])
 def showSummary():
     """
     Displays the summary of all competitions
