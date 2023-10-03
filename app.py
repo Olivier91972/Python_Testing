@@ -1,27 +1,37 @@
 import datetime
-import json
+# import json
 from flask import Flask, render_template, request, redirect, flash, url_for
 
 from functions import date_is_passed
 
+from utils import (
+    load_clubs,
+    load_competitions,
+    sort_competitions_date,
+    initialize_booked_places,
+    update_booked_places
+)
 
-def loadClubs():
-    with open('clubs.json') as c:
-        listOfClubs = json.load(c)['clubs']
-        return listOfClubs
 
-
-def loadCompetitions():
-    with open('competitions.json') as comps:
-        listOfCompetitions = json.load(comps)['competitions']
-        return listOfCompetitions
+# def loadClubs():
+#     with open('clubs.json') as c:
+#         listOfClubs = json.load(c)['clubs']
+#         return listOfClubs
+#
+#
+# def loadCompetitions():
+#     with open('competitions.json') as comps:
+#         listOfCompetitions = json.load(comps)['competitions']
+#         return listOfCompetitions
 
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
 
-competitions = loadCompetitions()
-clubs = loadClubs()
+competitions = load_competitions()
+clubs = load_clubs()
+past_competitions, present_competitions = sort_competitions_date(competitions)
+places_booked = initialize_booked_places(competitions, clubs)
 
 
 now = datetime.datetime.now()
@@ -50,35 +60,51 @@ def showSummary():
 
 @app.route('/book/<competition>/<club>')
 def book(competition, club):
-    foundClub = [c for c in clubs if c['name'] == club][0]
-    foundCompetition = [c for c in competitions if c['name'] == competition][0]
-    if foundClub and foundCompetition:
-        return render_template('booking.html', club=foundClub, competition=foundCompetition)
-    else:
-        flash("Something went wrong-please try again")
-        return render_template('welcome.html', club=club, competitions=competitions)
-#  Book_past_competition
+    try:
+        foundClub = [c for c in clubs if c['name'] == club][0]
+
+        foundCompetition = [c for c in competitions if c['name'] == competition][0]
+        if foundClub and foundCompetition:
+            return render_template('booking.html', club=foundClub, competition=foundCompetition)
+        else:
+            flash("Something went wrong-please try again")
+            return render_template('welcome.html', club=club, competitions=competitions)
+    except IndexError:
+        flash("list index out of range")
 
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
-    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
-    club = [c for c in clubs if c['name'] == request.form['club']][0]
-    placesRequired = int(request.form['places'])
-    if date_is_passed(competition['date']):
-        flash('You cannot buy a place for a competition that has already passed.')
-        return render_template('welcome.html', club=club, competitions=competitions)
-    elif placesRequired > 12:
-        flash('You cannot take more than 12 places')
-        return render_template('booking.html', club=club, competition=competition)
-    elif placesRequired > int(club["points"]):
-        flash("Try again - your points is less than what you book. ")
-        return render_template('booking.html', club=club, competition=competition)
-    else:
-        flash('Great-booking complete!')
-        competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
-        club["points"] = int(club["points"]) - placesRequired
-        return render_template('welcome.html', club=club, competitions=competitions)
+    try:
+        try:
+            competition = [c for c in competitions if c['name'] == request.form['competition']][0]
+            # print(competition)
+
+            club = [c for c in clubs if c['name'] == request.form['club']][0]
+            try:
+                placesRequired = int(request.form['places'])
+                if date_is_passed(competition['date']):
+                    flash('You cannot buy a place for a competition that has already passed.')
+                    return render_template('welcome.html', club=club, competitions=competitions)
+                elif placesRequired > 12:
+                    flash('You cannot take more than 12 places')
+                    return render_template('booking.html', club=club, competition=competition)
+                elif placesRequired > int(club["points"]):
+                    flash("Try again - your points is less than what you book. ")
+                    return render_template('booking.html', club=club, competition=competition)
+                else:
+                    flash('Great-booking complete!')
+                    update_booked_places(competition, club, places_booked, placesRequired)
+                    competition['numberOfPlaces'] = int(competition['numberOfPlaces']) - placesRequired
+                    club["points"] = int(club["points"]) - placesRequired
+                    return render_template('welcome.html', club=club, competitions=competitions)
+            except ValueError:
+                flash('invalid literal, please retry')
+                return render_template('booking.html', club=club, competition=competition)
+        except AttributeError:
+            flash("'NoneType' object has no attribute")
+    except IndexError:
+        flash('list index out of range')
 
 
 @app.route('/logout')
@@ -90,5 +116,5 @@ def logout():
 @app.route('/points_display')
 def points_display():
     club = [clu for clu in clubs]
-    print(club)
+    # print(club)
     return render_template('club_points.html', club=club, competitions=competitions)
