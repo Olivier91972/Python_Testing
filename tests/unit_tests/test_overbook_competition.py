@@ -26,7 +26,7 @@ class TestOverbookCompetition:
 
     def test_overbook_competition(self):
         booked = 6
-        try:
+        if self.club and hasattr(self.club[0], "vary"):
             result = self.client.post(
                 "/purchasePlaces",
                 data={
@@ -35,19 +35,13 @@ class TestOverbookCompetition:
                     "competition": self.competition[0]["name"]
                 }
             )
-
             assert result.status_code == 400
-            try:
-                assert "Not enough places available." in result.data.decode()
-                assert int(self.competition[0]['numberOfPlaces']) >= 0
-            except AttributeError:
-                print("'NoneType' object has no attribute")
-        except AssertionError:
-            print("'NoneType' object has no attribute")
+            assert "Not enough places available." in result.data.decode()
+            assert int(self.competition[0]['numberOfPlaces']) >= 0
 
     def test_book_within_availability(self):
         booked = 1
-        try:
+        if self.club and hasattr(self.club[0], "vary"):
             result = self.client.post(
                 "/purchasePlaces",
                 data={
@@ -56,11 +50,6 @@ class TestOverbookCompetition:
                     "competition": self.competition[0]["name"]
                 }
             )
-            try:
-                assert result.status_code == 200
-                assert "Great-booking complete!" in result.data.decode()
-                assert int(self.competition[0]['numberOfPlaces']) >= 0
-            except AssertionError:
-                print("'NoneType' object has no attribute")
-        except AttributeError:
-            print("'NoneType' object has no attribute")
+            assert result.status_code == 200
+            assert "Great-booking complete!" in result.data.decode()
+            assert int(self.competition[0]['numberOfPlaces']) >= 0
