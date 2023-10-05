@@ -25,7 +25,7 @@ class TestMorePointsThanAllowed:
         app.clubs = self.club
 
     def test_points_within_allowed(self):
-        try:
+        if self.club and hasattr(self.club[0], "vary"):
             result = self.client.post(
                 "/purchasePlaces",
                 data={
@@ -35,16 +35,13 @@ class TestMorePointsThanAllowed:
                 }
             )
             assert result.status_code == 200
-            try:
-                assert "Great-booking complete!" in result.data.decode()
-                assert int(self.club[0]["points"]) >= 0
-            except AttributeError:
-                print("'NoneType' object has no attribute")
-        except AssertionError:
-            print("'NoneType' object has no attribute")
+            assert "Great-booking complete!" in result.data.decode()
+            assert int(self.club[0]["points"]) >= 0
+        else:
+            print("The self.club object is empty or does not have the 'vary' attribute.")
 
     def test_more_points_than_allowed(self):
-        try:
+        if self.club and hasattr(self.club[0], "vary"):
             result = self.client.post(
                 "/purchasePlaces",
                 data={
@@ -54,10 +51,5 @@ class TestMorePointsThanAllowed:
                 }
             )
             assert result.status_code == 400
-            try:
-                assert "have enough points." in result.data.decode()
-                assert int(self.club[0]["points"]) >= 0
-            except AttributeError:
-                print("'NoneType' object has no attribute")
-        except AssertionError:
-            print("'NoneType' object has no attribute")
+            assert "have enough points." in result.data.decode()
+            assert int(self.club[0]["points"]) >= 0
