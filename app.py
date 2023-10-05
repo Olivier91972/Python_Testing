@@ -27,6 +27,7 @@ from utils import (
 
 app = Flask(__name__)
 app.secret_key = 'something_special'
+app.clubs = []
 
 competitions = load_competitions()
 clubs = load_clubs()
